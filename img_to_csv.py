@@ -83,7 +83,7 @@ def hand_detection(pair):
     # cv2.circle(image, hand_center, 10, (0, 255, 0), -1)
     # cv2.imwrite(output_path, image)
 
-    label = re.split(r"\d+", file_name.split("/")[11])[0]
+    label = re.split(r"[0-9_]+", file_name.split("/")[11])[0]
 
     coutput = crop_hands(image, hand_center, max_distance)
     flattened_pixels = np.reshape(coutput, [1, coutput.size])
@@ -132,7 +132,6 @@ def crop_hands(image, hand_center, max_distance):
 
 
 def create_dataset_csv(rdd):
-
     # for each in binary_rdd.collect():
     #     numpy_arrays.append(np.frombuffer(each[1], np.uint8))
 
