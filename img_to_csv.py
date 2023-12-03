@@ -4,6 +4,17 @@ import cv2
 import os
 import mediapipe as mp
 import math
+import re
+
+alphabet_mapping = {
+    chr(i): i - ord("A") if "A" <= chr(i) <= "Z" else i - ord("a")
+    for i in range(ord("A"), ord("Z") + 1)
+}
+
+# Adding 'nothing', 'space', and 'del', error is 29
+alphabet_mapping["del"] = 26
+alphabet_mapping["nothing"] = 27
+alphabet_mapping["space"] = 28
 
 
 def calculate_distance(point1, point2):
@@ -20,9 +31,9 @@ def hand_detection(pair):
 
     # Specify the output path to save the image/csv
 
-    output_path = os.path.join(
-        output_folder, f"{file_name.split('/')[-1].split('.')[0]}.csv"
-    )
+    # output_path = os.path.join(
+    #     output_folder, f"{file_name.split('/')[-1].split('.')[0]}.csv"
+    # )
 
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands()
@@ -72,13 +83,21 @@ def hand_detection(pair):
     # cv2.circle(image, hand_center, 10, (0, 255, 0), -1)
     # cv2.imwrite(output_path, image)
 
+    label = re.split(r"\d+", file_name.split("/")[11])[0]
+
     coutput = crop_hands(image, hand_center, max_distance)
     flattened_pixels = np.reshape(coutput, [1, coutput.size])
 
     # save as csv file
-    np.savetxt(output_path, flattened_pixels, fmt='%d', delimiter=",")
+    # np.savetxt(output_folder, flattened_pixels, fmt='%d', delimiter=",")
+    # print(flattened_pixels.shape)
 
-    return flattened_pixels
+    if label in alphabet_mapping:
+        label = alphabet_mapping[label]
+    else:
+        label = 29
+
+    return label, flattened_pixels
 
 
 def crop_hands(image, hand_center, max_distance):
@@ -103,12 +122,28 @@ def crop_hands(image, hand_center, max_distance):
 
     # Crop the image around the hands
     cropped_image = image[y_min:y_max, x_min:x_max]
-    target_size = (128, 128)
+    target_size = (100, 100)
     resized_image = cv2.resize(cropped_image, target_size)
+    recolored = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
 
     # Save the cropped image to a file
     # cv2.imwrite(output_path, resized_image)
-    return resized_image
+    return recolored
+
+
+def create_dataset_csv(rdd):
+
+    # for each in binary_rdd.collect():
+    #     numpy_arrays.append(np.frombuffer(each[1], np.uint8))
+
+    labels = rdd.map(lambda x: x[0]).collect()
+    numpy_arrays = labels_and_arrays.map(lambda x: x[1]).collect()
+    labels = np.array(labels).reshape(len(labels), 1)
+
+    # Concatenate the NumPy arrays into one
+    result_array = np.concatenate((labels, np.concatenate(numpy_arrays)), axis=1)
+
+    return result_array
 
 
 if __name__ == "__main__":
@@ -116,13 +151,17 @@ if __name__ == "__main__":
     sc = SparkContext(conf=conf)
 
     # Specify the path to the folder containing binary files
-    image_path = "Leo_testing_folder/imgtest"
-    output_folder = "Leo_testing_folder/output_images"
+    image_path = "data/asl_alphabet_test"
+    output_folder = "Leo_testing_folder/classifier_csvs/testing.csv"
 
     # Read binary files into an RDD
     binary_rdd = sc.binaryFiles(image_path)
 
-    binary_rdd.map(hand_detection)
+    labels_and_arrays = binary_rdd.map(hand_detection)
+
+    result_array = create_dataset_csv(labels_and_arrays)
+
+    np.savetxt(output_folder, result_array, fmt="%d", delimiter=",")
 
     # Stop the SparkContext when done
     sc.stop()
