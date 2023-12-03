@@ -11,7 +11,7 @@ alphabet_mapping = {
     for i in range(ord("A"), ord("Z") + 1)
 }
 
-# Adding 'nothing', 'space', and 'del', error is 29
+# Adding 'nothing', 'space', and 'del'
 alphabet_mapping["del"] = 26
 alphabet_mapping["nothing"] = 27
 alphabet_mapping["space"] = 28
@@ -95,7 +95,7 @@ def hand_detection(pair):
     if label in alphabet_mapping:
         label = alphabet_mapping[label]
     else:
-        label = 29
+        label = 27
 
     return label, flattened_pixels
 
