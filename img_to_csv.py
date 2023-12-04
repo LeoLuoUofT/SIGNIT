@@ -9,6 +9,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql import Row
 from pyspark.sql.functions import col
 from pyspark.sql.types import StructType, StructField, IntegerType, ArrayType
+from tensorflow.keras.models import load_model
+import sys
 
 alphabet_mapping = {
     chr(i): i - ord("A") if "A" <= chr(i) <= "Z" else i - ord("a")
@@ -104,6 +106,28 @@ def hand_detection(pair):
     return label, flattened_pixels
 
 
+def create_data(pair):
+    file_name, binary_content = pair
+
+    image_array = np.frombuffer(binary_content, np.uint8)
+    image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+    label = re.split(r"[0-9_]+", file_name.split("/")[12])[0]
+
+    target_size = (100, 100)
+    resized_image = cv2.resize(image, target_size)
+    recolored = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
+
+    coutput = recolored
+    flattened_pixels = np.reshape(coutput, [1, coutput.size])
+
+    if label in alphabet_mapping:
+        label = alphabet_mapping[label]
+    else:
+        label = 27
+
+    return label, flattened_pixels
+
+
 def crop_hands(image, hand_center, max_distance):
     # Calculate the bounding box dimensions
     x_min = max(0, int(hand_center[0] - 2 * max_distance))
@@ -153,14 +177,21 @@ if __name__ == "__main__":
     conf = SparkConf().setAppName("BinaryFile")
     sc = SparkContext(conf=conf)
 
+    if len(sys.argv) != 3:
+        print("Usage: python script.py <input_path> <output_folder>")
+        sys.exit(1)
+
     # Specify the path to the folder containing binary files
-    image_path = "data/asl_alphabet_test"
-    output_folder = "Leo_testing_folder/classifier_csvs/testing.csv"
+    image_path = sys.argv[1]
+    output_folder = sys.argv[2]
 
     # Read binary files into an RDD
     binary_rdd = sc.binaryFiles(image_path)
 
-    labels_and_arrays = binary_rdd.map(hand_detection)
+    # labels_and_arrays = binary_rdd.map(hand_detection)
+
+    # just for dataset
+    labels_and_arrays = binary_rdd.map(create_data)
 
     # create dataset
     # result_array = create_dataset_csv(labels_and_arrays)
@@ -188,7 +219,12 @@ if __name__ == "__main__":
         ],
     )
 
-    print("Number of columns:", len(df.columns))
+    # input_data = df.toPandas().values
+
+    # model = load_model("model.keras")
+    # predictions = model.predict(input_data)
+
+    df.write.csv(output_folder, header=False, mode="overwrite")
 
     # Stop the SparkContext when done
     sc.stop()
