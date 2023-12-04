@@ -5,6 +5,10 @@ import os
 import mediapipe as mp
 import math
 import re
+from pyspark.sql import SparkSession
+from pyspark.sql import Row
+from pyspark.sql.functions import col
+from pyspark.sql.types import StructType, StructField, IntegerType, ArrayType
 
 alphabet_mapping = {
     chr(i): i - ord("A") if "A" <= chr(i) <= "Z" else i - ord("a")
@@ -158,9 +162,33 @@ if __name__ == "__main__":
 
     labels_and_arrays = binary_rdd.map(hand_detection)
 
-    result_array = create_dataset_csv(labels_and_arrays)
+    # create dataset
+    # result_array = create_dataset_csv(labels_and_arrays)
+    # np.savetxt(output_folder, result_array, fmt="%d", delimiter=",")
 
-    np.savetxt(output_folder, result_array, fmt="%d", delimiter=",")
+    schema = StructType(
+        [
+            StructField("label", IntegerType(), True),
+            StructField("pixels", ArrayType(IntegerType()), True),
+        ]
+    )
+
+    spark = SparkSession.builder.appName("Input Dataframe").getOrCreate()
+    rdd_rows = labels_and_arrays.map(
+        lambda x: Row(label=x[0], pixels=list(x[1].flatten().astype(int).tolist()))
+    )
+
+    # Explode the pixels array into separate columns
+    df = spark.createDataFrame(rdd_rows, schema=schema)
+    df = df.select(
+        "label",
+        *[
+            col("pixels")[i].cast(IntegerType()).alias(f"pixel_{i+1}")
+            for i in range(len(df.select("pixels").first()[0]))
+        ],
+    )
+
+    print("Number of columns:", len(df.columns))
 
     # Stop the SparkContext when done
     sc.stop()
