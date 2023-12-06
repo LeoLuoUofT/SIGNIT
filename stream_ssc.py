@@ -2,6 +2,7 @@ import subprocess
 import time
 import datetime
 from concurrent.futures import ThreadPoolExecutor
+import csv
 
 
 def get_stream_url(url):
@@ -19,11 +20,26 @@ def pull_frames(stream_url, name):
         current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
         # Use the name and timestamp in the filename
-        filename = f"stream_inputs/{name}_{current_time}.png"
+        filename = f"stream_inputs/{name}_{current_time}.txt"
 
+        # Use ffmpeg to extract raw video frames and redirect the output to a text file
         subprocess.run(
-            ["ffmpeg", "-i", stream_url, "-vf", "fps=1", "-t", "1", filename]
+            [
+                "ffmpeg",
+                "-i",
+                stream_url,
+                "-vf",
+                "fps=1",
+                "-t",
+                "1",
+                "-f", "rawvideo",
+                "-pix_fmt",
+                "rgb24",
+                "-",
+            ],
+            stdout=open(filename, "w"),
         )
+
     except Exception as e:
         print(f"Error downloading frames: {e}")
 
@@ -44,5 +60,5 @@ if __name__ == "__main__":
         with ThreadPoolExecutor() as executor:
             # Process each URL concurrently
             executor.map(lambda args: process_video(*args), URL_Name_List)
-
-        # time.sleep(1)  # Sleep for 1 second before processing URLs again
+        
+        time.sleep(1)

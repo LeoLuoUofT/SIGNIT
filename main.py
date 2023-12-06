@@ -27,7 +27,7 @@ def calculate_distance(point1, point2):
     return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
 
-def hand_detection(pair, intermediateimages=False):
+def hand_detection(pair, intermediateimages=True):
     # Extract the file name and binary content from the RDD pair
     file_name, binary_content = pair
 
@@ -176,11 +176,8 @@ def write_dataset_csv(rdd):
         ]
     )
 
-    rdd_rows = rdd.map(
-        lambda x: Row(label=x[0], pixels=list(x[1].flatten().astype(int).tolist())),
-    )
-
-    df = spark.createDataFrame(rdd_rows, schema=schema)
+    spark = SparkSession.builder.appName("Input Dataframe").getOrCreate()
+    df = spark.createDataFrame(rdd, schema=schema)
     df = df.select(
         "label",
         *[
@@ -200,12 +197,8 @@ def output_predicts(rdd):
         ]
     )
 
-    rdd_rows = rdd.map(
-        lambda x: Row(sequence=x[0], pixels=list(x[1].flatten().astype(int).tolist())),
-    )
-
     spark = SparkSession.builder.appName("Input Dataframe").getOrCreate()
-    df = spark.createDataFrame(rdd_rows, schema=schema)
+    df = spark.createDataFrame(rdd, schema=schema)
     df = df.select(
         "sequence",
         *[
@@ -263,10 +256,15 @@ def output_predicts(rdd):
 
 
 if __name__ == "__main__":
+    from pyspark import SparkConf, SparkContext
     from pyspark.streaming import StreamingContext
+    from pyspark.sql import Row, SparkSession
 
-    conf = SparkConf().setAppName("BinaryFile")
+    conf = SparkConf().setAppName("BinaryFileStreaming")
     sc = SparkContext(conf=conf)
+
+    # Create a StreamingContext with batch interval of 5 seconds
+    sc = StreamingContext(sc, 2)
 
     if len(sys.argv) != 3:
         print("Usage: python script.py <input_path> <output_folder>")
@@ -276,23 +274,22 @@ if __name__ == "__main__":
     image_path = sys.argv[1]
     output_folder = sys.argv[2]
 
-    image_stream = sc.binaryFiles(image_path)
+    image_stream = sc.textFileStream(image_path)
 
-    # Read binary files into an RDD
-    binary_rdd = image_stream
-
-    # just for dataset
-    img_arrays = binary_rdd.map(hand_detection)
+    # rdd to image type
+    # img_arrays = binary_rdd.map(hand_detection)
+    # rdd_rows = img_arrays.map(
+    #     lambda x: Row(sequence=x[0], pixels=list(x[1].flatten().astype(int).tolist())),
+    # )
 
     # create datase
     # write_dataset_csv(img_arrays)
 
-    prd = output_predicts(img_arrays)
+    # prd = output_predicts(rdd_rows)
     # predictions.show()
-    print(prd)
+    image_stream.saveAsTextFiles(output_folder)
 
     # Stop the SparkContext when done
-    sc.stop
-
-    # Await termination
+    sc.start()
     sc.awaitTermination()
+
