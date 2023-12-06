@@ -1,3 +1,9 @@
 https://github.com/ytdl-org/ytdl-nightly/releases/tag/2023.12.03
+pyarrow', 'fastparquet'
 
 spark-submit main.py stream_inputs a
+
+agenda:
+acquiring training data - seems easy, is not
+
+streaming - need to resize everything first, spark streaming does not support images nor does it support fked up text files.
