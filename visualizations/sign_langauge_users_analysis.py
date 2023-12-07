@@ -71,13 +71,13 @@ regional_data_query = spark.sql("""
 regional_data = regional_data_query.collect()
 
 for row in regional_data:
-    print(f"Region Name: {row['SHA name']}, Deaf Individuals who use sign Langauge: {row['yes_count']}, Non-Deaf Individuals who do not use sign Langauge: {row['no_count']}")
+    print(f"Region Name: {row['SHA name']}, Deaf Individuals who use sign Langauge: {row['yes_count']}, Non-Sign Language Users: {row['no_count']}")
 
 df_3rd_query = regional_data_query.toPandas()
 
-fig_3rd_query = px.area(df_3rd_query, x='yes_count', y='no_count', color='SHA name',
+fig_3rd_query = px.bar(df_3rd_query, x='yes_count', y='no_count', color='SHA name',
                 title='Deaf Sign Language Users by Region',
-                labels={'yes_count': 'Deaf Individuals who use sign Language', 'no_count': 'Non-Deaf Individuals who do not use sign Language'})
+                labels={'yes_count': 'Deaf Individuals who use sign Language', 'no_count': 'Non-Sign Language Users'})
 fig_3rd_query.show()
 
 spark.stop()
