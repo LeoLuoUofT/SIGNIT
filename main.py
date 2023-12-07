@@ -3,10 +3,11 @@ import tkinter as tk
 from tkinter import ttk
 from threading import Thread, Event
 from ttkthemes import ThemedTk
+import os
 
 
 def run_script(
-    script_path, input_directory, output_callback, terminate_event, duration=None
+    script_path, input_directory, output_callback, terminate_event, duration
 ):
     spark_submit_cmd = ["spark-submit", "--master", "local[*]"]
 
@@ -19,21 +20,14 @@ def run_script(
         ]
         print("Running -> folder to Sign Language Letter conversion.")
     else:
-        if duration is not None:
-            spark_submit_cmd += [
-                "--conf",
-                "spark.driver.maxResultSize=0",
-                script_path,
-                input_directory,
-                str(duration),
-            ]
-        else:
-            spark_submit_cmd += [
-                "--conf",
-                "spark.driver.maxResultSize=0",
-                script_path,
-                input_directory,
-            ]
+        spark_submit_cmd += [
+            "--conf",
+            "spark.driver.maxResultSize=0",
+            script_path,
+            str(duration),
+        ]
+
+    # Continue with the existing code for 'SIGNIT convert' subprocess
 
     process = subprocess.Popen(
         spark_submit_cmd,
@@ -53,7 +47,7 @@ def run_script(
     process.wait()
 
 
-def create_gui(terminate_event):
+def create_gui(terminate_event, subprocesses):
     root = ThemedTk(theme="plastik")  # Change the theme to "plastik" for dark mode
     root.title("Subprocess Output Viewer")
     root.geometry("600x600")
@@ -78,6 +72,9 @@ def create_gui(terminate_event):
     def on_close():
         terminate_event.set()
         root.destroy()
+        # Terminate all subprocesses
+        for process in subprocesses:
+            process.terminate()
 
     root.protocol("WM_DELETE_WINDOW", on_close)  # Bind close event to on_close
 
@@ -87,7 +84,7 @@ def create_gui(terminate_event):
 
     kill_button = tk.Button(
         button_frame,
-        text="Kill Subprocess",
+        text="Return to Menu",
         command=on_close,
         background="#3E3E3E",
         foreground="white",
@@ -101,71 +98,97 @@ def update_gui(text_widget, line):
     text_widget.insert(tk.END, line)
     text_widget.see(tk.END)  # Scroll to the end
 
+
 def main():
+    subprocesses = []
+
     while True:
         user_choice = input(
-            "Enter 1 for 'SIGNIT stream', 2 for 'SIGNIT convert', or q to quit: "
+            "Enter 1 for 'SIGNIT stream', 2 for 'SIGNIT convert', 3 for SIGNIT Video convert, or q to quit: "
         )
         if user_choice.lower() == "q":
+            # Terminate all subprocesses before exiting
+            for process in subprocesses:
+                process.terminate()
+            bashCommand = (
+                "rm -r stream_inputs/* stream_outputs/* intermediate/* video_frames/*"
+            )
+            os.system(bashCommand)
             break
 
         if user_choice == "1":
             script_path = "SIGNIT_stream.py"
-            try:
-                duration = int(
-                    input("Enter duration in seconds (or press Enter for unlimited): ")
-                )
-            except ValueError:
-                duration = None  # If the user enters an invalid value, run without duration limit
+            while True:
+                try:
+                    duration = int(input("Enter duration in seconds: "))
+                    if duration <= 0:
+                        print("Please enter a positive integer value.")
+                        continue
+                    break  # Exit the loop if a valid positive integer is entered
+                except ValueError:
+                    print("Invalid input. Please enter a positive integer value.")
+                    duration = None
 
-        else:
+            input_directory = input("Enter the streaming URL: ")
+            name = input("Enter the name of the stream: ")
+        elif user_choice == "3":
+            video_location = input("Enter the name of video: ")
+            bashCommand = f"ffmpeg -i {video_location} -vf format=gray -r 1/1 video_frames/%03d.jpg"
+            os.system(bashCommand)
+            input_directory = "video_frames"
             script_path = "SIGNIT_convert.py"
             duration = None
-
-        input_directory = input("Enter the input directory: ")
+            name = None
+        elif user_choice== "2":
+            script_path = "SIGNIT_convert.py"
+            duration = None
+            name = None
+            input_directory = input("Enter the input directory: ")
+        else:
+            print("invalid input please try again")
+            continue
 
         terminate_event = Event()  # Change to threading.Event
 
-        root, text_widget = create_gui(terminate_event)
+        # Run the script in a separate thread
+        if user_choice == "1":
+            process = subprocess.Popen(
+                ["python", "stream_input.py", input_directory, name, str(duration)]
+            )
+            subprocesses.append(process)
+            print("Running Stream for ", duration, "seconds.")
+        print(
+            "WARNING! CLOSING THE WINDOW BEFORE THE PROCESS(ES) FINISHES WILL RESULT IN ERRORS."
+        )
+
+        root, text_widget = create_gui(terminate_event, subprocesses)
 
         def gui_updater(line):
             text_widget.after(0, update_gui, text_widget, line)
 
-        # Run the script in a separate thread
         script_thread = Thread(
             target=run_script,
-            args=(script_path, input_directory, gui_updater, terminate_event, duration),
+            args=(
+                script_path,
+                input_directory,
+                gui_updater,
+                terminate_event,
+                duration,
+            ),
         )
         script_thread.start()
-
-        return_to_menu = False
-
-        def check_input():
-            nonlocal return_to_menu
-            if input("Do you want to return to the main menu? (y/n): ").lower() == "y":
-                return_to_menu = True
-                root.quit()
-
-        # Check for user input periodically
-        root.after(1000, check_input)
 
         try:
             # Main loop to keep the GUI running
             root.mainloop()
 
-            if return_to_menu:
-                break
-
-        except Exception:
+        except KeyboardInterrupt:
             pass
 
         finally:
             # Terminate the script thread when the main loop exits
             terminate_event.set()
             script_thread.join()
-
-        print("okay")
-
 
 
 if __name__ == "__main__":

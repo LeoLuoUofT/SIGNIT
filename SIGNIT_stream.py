@@ -10,6 +10,7 @@ from pyspark.sql.types import (
 import numpy as np
 import pandas as pd
 from tensorflow.keras.models import load_model
+import sys
 
 # Initialize Spark session
 spark = SparkSession.builder.appName("ImageStream").getOrCreate()
@@ -74,8 +75,7 @@ def sanity_check(processed_df):
     # Display the processed DataFrame
     sanity_check = "stream_sanity_check"
     query3 = (
-        processed_df.writeStream
-        .format("csv")
+        processed_df.writeStream.format("csv")
         .option("header", "true")
         .option("checkpointLocation", "checkpoint2")  # Add a checkpoint location
         .option("path", sanity_check)  # Specify the output path
@@ -120,20 +120,17 @@ final_df = (
 
 if no_sanity:
     query2, query3 = sanity_check(processed_df)
-query = (
-    final_df.writeStream.outputMode("update")
-    .format("console")
-    .start()
-)
+query = final_df.writeStream.outputMode("update").format("console").start()
 
 # query = (
 #     exploded_df.writeStream.outputMode("append")
 #     .format("console")
 #     .start()
 # )
+seconds = int(sys.argv[1])
 try:
     # Keep the script running to continuously process new data
-    query.awaitTermination()
+    query.awaitTermination(timeout = seconds)
     if no_sanity:
         query2.awaitTermination()
         query3.awaitTermination()

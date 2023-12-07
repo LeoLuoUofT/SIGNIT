@@ -185,14 +185,22 @@ def process_video(url, name):
 
 
 if __name__ == "__main__":
+    # Check if enough command-line arguments are provided
+    # Parse command-line arguments
+    url = sys.argv[1]
+    name = sys.argv[2]
+    seconds_to_stop = int(sys.argv[3])
 
-    URLe, name = ("https://www.youtube.com/live/gCNeDWCI0vo?si=AAxtZcpFBL26CbEG", "Al")
+    start_time = time.time()
 
     while True:
-        process_video(URLe, name)
-
+        process_video(url, name)
         time.sleep(1)
 
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= seconds_to_stop:
+            print(f"Stopping after {seconds_to_stop} seconds.")
+            break
 
     # URL_Name_List = [
     #     ("https://www.youtube.com/live/gCNeDWCI0vo?si=AAxtZcpFBL26CbEG", "Al"),
