@@ -16,6 +16,6 @@ https://drive.google.com/drive/folders/1Wkrkvy6Bl-JNvMFeZDGc8utKjkS7LJXt?usp=sha
 
 Pfft!! Explains all the coffee lying around - Kansha
 
-Checkout stream_input.py for getting frames per second from live streams.
+Checkout stream_input.py for pulling frames from live  youtube and twitch streams.
 
-More vislualization and data analysis stats in the Visualizations folder 
+More visualization and data analysis stats in the Visualizations folder 
