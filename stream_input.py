@@ -8,7 +8,7 @@ from PIL import Image
 import io
 import pandas as pd
 import mediapipe as mp
-from main import crop_hands
+from SIGNIT_convert import crop_hands
 import math
 import sys
 
@@ -185,14 +185,23 @@ def process_video(url, name):
 
 
 if __name__ == "__main__":
-    URL_Name_List = [
-        ("https://www.youtube.com/live/gCNeDWCI0vo?si=AAxtZcpFBL26CbEG", "Al"),
-        # ("https://www.twitch.tv/test0251", "Test_Stream"),
-    ]
+
+    URLe, name = ("https://www.youtube.com/live/gCNeDWCI0vo?si=AAxtZcpFBL26CbEG", "Al")
 
     while True:
-        with ThreadPoolExecutor() as executor:
-            # Process each URL concurrently
-            executor.map(lambda args: process_video(*args), URL_Name_List)
+        process_video(URLe, name)
 
         time.sleep(1)
+
+
+    # URL_Name_List = [
+    #     ("https://www.youtube.com/live/gCNeDWCI0vo?si=AAxtZcpFBL26CbEG", "Al"),
+    #     # ("https://www.twitch.tv/test0251", "Test_Stream"),
+    # ]
+
+    # while True:
+    #     with ThreadPoolExecutor() as executor:
+    #         # Process each URL concurrently
+    #         executor.map(lambda args: process_video(*args), URL_Name_List)
+
+    #     time.sleep(1)

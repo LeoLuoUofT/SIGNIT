@@ -14,7 +14,7 @@ from tensorflow.keras.models import load_model
 # Initialize Spark session
 spark = SparkSession.builder.appName("ImageStream").getOrCreate()
 spark.sparkContext.setLogLevel("ERROR")
-no_sanity = True
+no_sanity = False
 
 # Define the schema for the Parquet files
 parquet_schema = StructType(

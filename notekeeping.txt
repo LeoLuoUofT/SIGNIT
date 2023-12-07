@@ -7,3 +7,5 @@ agenda:
 acquiring training data - seems easy, is not
 
 streaming - need to resize everything first, spark streaming does not support images nor does it support fked up text files.
+
+capable of doing multiple streams but need to run manually

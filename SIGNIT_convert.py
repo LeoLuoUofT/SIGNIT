@@ -27,7 +27,7 @@ def calculate_distance(point1, point2):
     return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
 
-def hand_detection(pair, intermediateimages=True):
+def hand_detection(pair, intermediateimages=False):
     # Extract the file name and binary content from the RDD pair
     file_name, binary_content = pair
 
@@ -263,13 +263,13 @@ if __name__ == "__main__":
     conf = SparkConf().setAppName("Folder ")
     sc = SparkContext(conf=conf)
 
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 2:
         print("Usage: python script.py <input_path> <output_folder>")
         sys.exit(1)
 
     # Specify the path to the folder containing binary files
     image_path = sys.argv[1]
-    output_folder = sys.argv[2]
+    output_folder = 5
 
     binary_rdd = sc.binaryFiles(image_path)
 
