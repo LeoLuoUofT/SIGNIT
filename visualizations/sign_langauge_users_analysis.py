@@ -27,7 +27,7 @@ fig_1st_query.show()
 top_regions_query = spark.sql("""
     SELECT
         `SHA name` AS region_name,
-         COUNT(*) AS total_respondents,
+         SUM(`Deaf and uses sign language - total responses`) AS total_respondents,
          SUM(CAST(Yes AS INT)) AS deaf_signlanguage_users
     FROM deaf_signlanguage
     GROUP BY region_name
