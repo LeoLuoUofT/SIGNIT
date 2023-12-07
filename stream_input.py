@@ -1,11 +1,8 @@
 import subprocess
 import time
 import datetime
-from concurrent.futures import ThreadPoolExecutor
 import cv2
 import numpy as np
-from PIL import Image
-import io
 import pandas as pd
 import mediapipe as mp
 from SIGNIT_convert import crop_hands

@@ -1,7 +1,5 @@
 import cv2
 import sys
-import numpy as np
-import time
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
     StructType,

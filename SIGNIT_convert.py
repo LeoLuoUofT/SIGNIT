@@ -4,7 +4,6 @@ import cv2
 import os
 import mediapipe as mp
 import math
-import re
 from pyspark.sql import SparkSession
 from pyspark.sql import Row
 from pyspark.sql.functions import col
