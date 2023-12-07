@@ -13,3 +13,9 @@ https://drive.google.com/drive/folders/1Wkrkvy6Bl-JNvMFeZDGc8utKjkS7LJXt?usp=sha
 3.b)Now upload these csv files onto google colab and run the classifier.ipynb file present in the visualizations folder of the repository on google colab with these csv.
 
 3.c)Sit back, relax and wait for results.
+
+Pfft!! Explains all the coffee lying around - Kansha
+
+Checkout stream_input.py for getting frames per second from live streams.
+
+More vislualization and data analysis stats in the Visualizations folder 
