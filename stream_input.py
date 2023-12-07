@@ -69,7 +69,7 @@ def draw_landmarks(image, filename, intermediate_images=False):
         max_distance = width
 
     if intermediate_images:
-        saved = f"intermediate/{filename}_intermediate1.png"
+        saved = f"byproducts/intermediate/{filename}_intermediate1.png"
         cv2.imwrite(saved, image_rgb)
 
     return hand_center, max_distance
@@ -98,7 +98,9 @@ def image_to_parquet(
         coutput = crop_hands(img_array, center, max_distance)
 
         if intermediate_images:
-            cv2.imwrite(f"intermediate/{filename}_intermediate2.png", coutput)
+            cv2.imwrite(
+                f"byproducts/intermediate/{filename}_intermediate2.png", coutput
+            )
 
         pixel_values = list(coutput.flatten())
 
@@ -137,7 +139,7 @@ def pull_frames(stream_url, name, num_frames=5):
         current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
         # Use the name and timestamp in the filenames
-        filename_parquet = f"stream_inputs/{name}_{current_time}.parquet"
+        filename_parquet = f"byproducts/stream_inputs/{name}_{current_time}.parquet"
 
         image_data_list = []  # List to store image data for multiple frames
 

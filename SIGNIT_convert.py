@@ -264,12 +264,12 @@ if __name__ == "__main__":
     sc = SparkContext(conf=conf)
 
     if len(sys.argv) != 2:
-        print("Usage: python script.py <input_path> <output_folder>")
+        print("Usage: spark-submit script.py <input_path>")
         sys.exit(1)
 
     # Specify the path to the folder containing binary files
     image_path = sys.argv[1]
-    output_folder = 5
+    output_folder = "byproducts/intermediate"
 
     binary_rdd = sc.binaryFiles(image_path)
 
@@ -284,7 +284,13 @@ if __name__ == "__main__":
 
     prd = output_predicts(rdd_rows)
     print(prd)
+    print("Saving to byproducts/output.txt")
+    prd_str = "".join(prd)
+
+    # Save the string to a file
+    file_path = "byproducts/output.txt"
+    with open(file_path, "a") as file:
+        file.write("\n"+prd_str)
 
     # Stop the SparkContext when done
-    sc.start()
-    sc.awaitTermination()
+    sc.stop()

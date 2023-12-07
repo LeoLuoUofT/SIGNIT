@@ -49,7 +49,7 @@ def run_script(
 
 def create_gui(terminate_event, subprocesses):
     root = ThemedTk(theme="plastik")  # Change the theme to "plastik" for dark mode
-    root.title("Subprocess Output Viewer")
+    root.title("SPARK PROGRAM")
     root.geometry("600x600")
 
     text_frame = ttk.Frame(root)
@@ -103,17 +103,18 @@ def main():
     subprocesses = []
 
     while True:
+        print("Removing previous byproducts.")
+        bashCommand = "rm -r byproducts/stream_inputs/* byproducts/stream_outputs/* byproducts/intermediate/* byproducts/video_frames/*"
+        os.system(bashCommand + " > nul 2>&1")
         user_choice = input(
-            "Enter 1 for 'SIGNIT stream', 2 for 'SIGNIT convert', 3 for SIGNIT Video convert, or q to quit: "
+            "Enter 1 for 'SIGNIT stream', 2 for 'SIGNIT convert', 3 for 'SIGNIT Video convert', or q to quit: "
         )
         if user_choice.lower() == "q":
             # Terminate all subprocesses before exiting
             for process in subprocesses:
                 process.terminate()
-            bashCommand = (
-                "rm -r stream_inputs/* stream_outputs/* intermediate/* video_frames/*"
-            )
-            os.system(bashCommand)
+            os.system(bashCommand + " > nul 2>&1")
+            print("Shutting Down. Thank you for using SIGNIT.")
             break
 
         if user_choice == "1":
@@ -133,13 +134,13 @@ def main():
             name = input("Enter the name of the stream: ")
         elif user_choice == "3":
             video_location = input("Enter the name of video: ")
-            bashCommand = f"ffmpeg -i {video_location} -vf format=gray -r 1/1 video_frames/%03d.jpg"
+            bashCommand = f"ffmpeg -i {video_location} -vf format=gray -r 1/1 byproducts/video_frames/%03d.jpg"
             os.system(bashCommand)
-            input_directory = "video_frames"
+            input_directory = "byproducts/video_frames"
             script_path = "SIGNIT_convert.py"
             duration = None
             name = None
-        elif user_choice== "2":
+        elif user_choice == "2":
             script_path = "SIGNIT_convert.py"
             duration = None
             name = None
@@ -157,6 +158,8 @@ def main():
             )
             subprocesses.append(process)
             print("Running Stream for ", duration, "seconds.")
+
+        # Errors with terminating process
         print(
             "WARNING! CLOSING THE WINDOW BEFORE THE PROCESS(ES) FINISHES WILL RESULT IN ERRORS."
         )

@@ -8,7 +8,6 @@ from pyspark.sql.types import (
     StringType,
 )
 import numpy as np
-import pandas as pd
 from tensorflow.keras.models import load_model
 import sys
 
@@ -27,8 +26,8 @@ parquet_schema = StructType(
 )
 
 # Define the input and output paths for structured streaming
-input_path = "stream_inputs/"
-output_path = "stream_outputs/"
+input_path = "byproducts/stream_inputs/"
+output_path = "byproducts/stream_outputs/"
 
 # Read new Parquet files as a streaming DataFrame
 streaming_df = spark.readStream.schema(parquet_schema).parquet(input_path)
@@ -73,11 +72,13 @@ def sanity_check(processed_df):
     processed_df = processed_df.select(explode(col("Pixels")).alias("Pixel"))
 
     # Display the processed DataFrame
-    sanity_check = "stream_sanity_check"
+    sanity_check = "byproducts/stream_sanity_check"
     query3 = (
         processed_df.writeStream.format("csv")
         .option("header", "true")
-        .option("checkpointLocation", "checkpoint2")  # Add a checkpoint location
+        .option(
+            "checkpointLocation", "byproducts/checkpoint"
+        )  # Add a checkpoint location
         .option("path", sanity_check)  # Specify the output path
         .start()
     )
@@ -130,7 +131,7 @@ query = final_df.writeStream.outputMode("update").format("console").start()
 seconds = int(sys.argv[1])
 try:
     # Keep the script running to continuously process new data
-    query.awaitTermination(timeout = seconds)
+    query.awaitTermination(timeout=seconds)
     if no_sanity:
         query2.awaitTermination()
         query3.awaitTermination()
