@@ -10,6 +10,6 @@ PART 3) To run the Classifier:-
 3.a)Download the csv files needed for model training and testing from the below link:- 
 https://drive.google.com/drive/folders/1Wkrkvy6Bl-JNvMFeZDGc8utKjkS7LJXt?usp=sharing
 
-3.b)Now upload these csv files onto google colab and run the classifier.ipynb file there with these csv.
+3.b)Now upload these csv files onto google colab and run the classifier.ipynb file present in the visualizations folder of the repository on google colab with these csv.
 
 3.c)Sit back, relax and wait for results.
