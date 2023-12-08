@@ -1,6 +1,3 @@
-all hail leo and his unfathomable skill to stay up for 3 days in a row
-
-hahah Ah, yes, the legendary Leo, defying the laws of sleep!-Rish
 
 
 
@@ -14,7 +11,6 @@ https://drive.google.com/drive/folders/1Wkrkvy6Bl-JNvMFeZDGc8utKjkS7LJXt?usp=sha
 
 3.c)Sit back, relax and wait for results.
 
-Pfft!! Explains all the coffee lying around - Kansha
 
 Please checkout stream_input.py for pulling frames from live  youtube and twitch streams.
 

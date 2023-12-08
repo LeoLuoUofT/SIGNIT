@@ -8,8 +8,11 @@ from pyspark.sql import SparkSession
 from pyspark.sql import Row
 from pyspark.sql.functions import col
 from pyspark.sql.types import StructType, StructField, IntegerType, ArrayType
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import model_from_json
 import sys
+from pyspark import SparkConf, SparkContext
+from pyspark.sql import Row, SparkSession
+from no_sanity import no_sanity
 
 alphabet_mapping = {
     chr(i): i - ord("A") if "A" <= chr(i) <= "Z" else i - ord("a")
@@ -26,7 +29,7 @@ def calculate_distance(point1, point2):
     return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
 
-def hand_detection(pair, intermediateimages=False):
+def hand_detection(pair, intermediateimages=no_sanity):
     # Extract the file name and binary content from the RDD pair
     file_name, binary_content = pair
 
@@ -91,9 +94,15 @@ def hand_detection(pair, intermediateimages=False):
         cv2.imwrite(output_path, image)
 
     coutput = crop_hands(image, hand_center, max_distance)
+    if intermediateimages:
+        output_path = os.path.join(
+            output_folder, f"{file_name.split('/')[-1].split('.')[0]}_resize.jpg"
+        )
+        cv2.imwrite(output_path, coutput)
+
     flattened_pixels = np.reshape(coutput, [1, coutput.size])
 
-    # save as csv file
+    # check the csv
     # np.savetxt(output_folder, flattened_pixels, fmt='%d', delimiter=",")
     # print(flattened_pixels.shape)
 
@@ -133,7 +142,7 @@ def raw_data(pair):
     # else:
     #     label = 27
 
-    return label_re(flattened_pixels, file_name)
+    return label_re(flattened_pixels, file_name, labels=True)
 
 
 def crop_hands(image, hand_center, max_distance):
@@ -161,12 +170,9 @@ def crop_hands(image, hand_center, max_distance):
     target_size = (100, 100)
     resized_image = cv2.resize(cropped_image, target_size)
     recolored = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
-
-    # Save the cropped image to a file
-    # cv2.imwrite(output_path, resized_image)
     return recolored
 
-
+# Create the training data
 def write_dataset_csv(rdd):
     schema = StructType(
         [
@@ -185,7 +191,7 @@ def write_dataset_csv(rdd):
         ],
     )
 
-    df.write.csv(output_folder, header=False, mode="overwrite")
+    df.write.csv(output_folder, header=True, mode="overwrite")
 
 
 def output_predicts(rdd):
@@ -240,7 +246,9 @@ def output_predicts(rdd):
     df_pandas = df.toPandas()
 
     input_data = np.array(df_pandas.iloc[:, 1:]).reshape(df.count(), 100, 100, 1)
-    model = load_model("model_small.keras")
+    with open("model.json", "r") as json_file:
+        loaded_model_json = json_file.read()
+        model = model_from_json(loaded_model_json)
     predictions = model.predict(input_data)
     predicted_indices = np.argmax(predictions, axis=1)
     predicted_class_names = [class_names[i] for i in predicted_indices]
@@ -255,41 +263,51 @@ def output_predicts(rdd):
 
 
 if __name__ == "__main__":
-    from pyspark import SparkConf, SparkContext
-    from pyspark.streaming import StreamingContext
-    from pyspark.sql import Row, SparkSession
-
-    conf = SparkConf().setAppName("Folder ")
+    conf = SparkConf().setAppName("SIGNIT_CONVERT")
     sc = SparkContext(conf=conf)
 
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 2 and len(sys.argv) != 4:
         print("Usage: spark-submit script.py <input_path>")
         sys.exit(1)
 
-    # Specify the path to the folder containing binary files
-    image_path = sys.argv[1]
-    output_folder = "byproducts/intermediate"
+    if sys.argv[1] != "datamode":
+        # Specify the path to the folder containing binary files
+        image_path = sys.argv[1]
+        output_folder = "byproducts/intermediate"
 
-    binary_rdd = sc.binaryFiles(image_path)
+        binary_rdd = sc.binaryFiles(image_path)
 
-    # rdd to image type
-    img_arrays = binary_rdd.map(hand_detection)
-    rdd_rows = img_arrays.map(
-        lambda x: Row(sequence=x[0], pixels=list(x[1].flatten().astype(int).tolist())),
-    )
+        # rdd to image type
+        img_arrays = binary_rdd.map(hand_detection)
+        rdd_rows = img_arrays.map(
+            lambda x: Row(
+                sequence=x[0], pixels=list(x[1].flatten().astype(int).tolist())
+            ),
+        )
 
-    # create dataset
-    # write_dataset_csv(img_arrays)
+        prd = output_predicts(rdd_rows)
+        print(prd)
+        print("Saving to byproducts/output.txt")
+        prd_str = "".join(prd)
 
-    prd = output_predicts(rdd_rows)
-    print(prd)
-    print("Saving to byproducts/output.txt")
-    prd_str = "".join(prd)
+        # Save the string to a file
+        file_path = "byproducts/output.txt"
+        with open(file_path, "a") as file:
+            file.write(prd_str + "\n")
 
-    # Save the string to a file
-    file_path = "byproducts/output.txt"
-    with open(file_path, "a") as file:
-        file.write("\n"+prd_str)
+        sc.stop()
+    else:
+        image_path = sys.argv[2]
+        output_folder = sys.argv[3]
 
-    # Stop the SparkContext when done
+        binary_rdd = sc.binaryFiles(image_path)
+        img_arrays = binary_rdd.map(raw_data)
+        rdd_rows = img_arrays.map(
+            lambda x: Row(
+                sequence=x[0], pixels=list(x[1].flatten().astype(int).tolist())
+            ),
+        )
+
+        # create dataset
+        write_dataset_csv(rdd_rows)
     sc.stop()

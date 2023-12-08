@@ -4,6 +4,7 @@ from tkinter import ttk
 from threading import Thread, Event
 from ttkthemes import ThemedTk
 import os
+from termcolor import colored
 
 
 def run_script(
@@ -160,8 +161,14 @@ def main():
             print("Running Stream for ", duration, "seconds.")
 
         # Errors with terminating process
+        print(colored("WARNING!", "red"))
+        print(colored("WARNING!", "red"))
+        print(colored("WARNING!", "red"))
         print(
-            "WARNING! CLOSING THE WINDOW BEFORE THE PROCESS(ES) FINISHES WILL RESULT IN ERRORS."
+            colored(
+                "CLOSING THE WINDOW BEFORE THE PROCESS(ES) FINISHES WILL RESULT IN ERRORS.",
+                "red",
+            )
         )
 
         root, text_widget = create_gui(terminate_event, subprocesses)

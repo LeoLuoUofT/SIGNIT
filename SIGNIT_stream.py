@@ -10,11 +10,11 @@ from pyspark.sql.types import (
 import numpy as np
 from tensorflow.keras.models import load_model
 import sys
+from no_sanity import no_sanity
 
 # Initialize Spark session
-spark = SparkSession.builder.appName("ImageStream").getOrCreate()
+spark = SparkSession.builder.appName("SIGNIT_STREAM").getOrCreate()
 spark.sparkContext.setLogLevel("ERROR")
-no_sanity = False
 
 # Define the schema for the Parquet files
 parquet_schema = StructType(

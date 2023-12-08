@@ -8,13 +8,14 @@ import mediapipe as mp
 from SIGNIT_convert import crop_hands
 import math
 import sys
+from no_sanity import no_sanity
 
 
 def calculate_distance(point1, point2):
     return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
 
-def draw_landmarks(image, filename, intermediate_images=False):
+def draw_landmarks(image, filename, intermediate_images=no_sanity):
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands()
 
@@ -77,7 +78,7 @@ def image_to_parquet(
     filenames,
     image_data_list,
     parquet_file_path,
-    intermediate_images=False,
+    intermediate_images=no_sanity,
 ):
     df_list = []  # List to store individual DataFrames for each image
     for filename, image_data in zip(filenames, image_data_list):
@@ -170,7 +171,7 @@ def pull_frames(stream_url, name, num_frames=5):
             [f"{name}_{current_time}_{i}" for i in range(num_frames)],
             image_data_list,
             filename_parquet,
-            intermediate_images=False,
+            intermediate_images=no_sanity,
         )
 
     except Exception as e:
