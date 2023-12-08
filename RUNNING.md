@@ -12,8 +12,7 @@ If you also wanted to see the intermediate images, change the no_sanity variable
 
 This will run the main part of the code but if you wanted to create your own training/testing data from the ASL Kaggle Alphabet Library. You can navigate to Leo_testing_folder/dataset_creation. The dataset_create.py will take every nth image from every subfolder and put them into a new folder (where n is your first input), once you've made your training and test sets use filterouttrainingimages.py to remove any images in the training set that occur in the testing set. A bash file is set up to preform this for you if you need it.
 
-
-
+If you wanted to see the outputs for multiple livestreams our stream_input.py supports that, just uncomment the last section and input the streams you wish to process.
 
 You also may run into problems with tensorflow depending on your operating system, this is because we are using an older version of tensorflow. If this is the case you will need to uninstall and reinstall the correct version and reconfigure your enviornment variables.
 
