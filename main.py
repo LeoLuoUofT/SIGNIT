@@ -105,7 +105,7 @@ def main():
 
     while True:
         print("Removing previous byproducts.")
-        bashCommand = "rm -r byproducts/stream_inputs/* byproducts/stream_outputs/* byproducts/intermediate/* byproducts/video_frames/*"
+        bashCommand = "rm -r byproducts/stream_inputs/* byproducts/stream_outputs/* byproducts/intermediate/* byproducts/video_frames/* byproducts/checkpoint/"
         os.system(bashCommand + " > nul 2>&1")
         user_choice = input(
             "Enter 1 for 'SIGNIT stream', 2 for 'SIGNIT convert', 3 for 'SIGNIT Video convert', or q to quit: "

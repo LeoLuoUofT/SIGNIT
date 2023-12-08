@@ -24,10 +24,8 @@ def convert_raw_to_image(input_file, output_file, width, height):
 
 
 if __name__ == "__main__":
-    input_file = (
-        "stream_inputs/Al_Jazeera_timestamp.txt"  # Adjust the filename accordingly
-    )
-    output_file = "output_image.png"  # Adjust the output filename and format as needed
+    input_file = "Leo_testing_folder\\failed_attempts_stream\\France_24_20231205231645.txt"  # Adjust the filename accordingly
+    output_file = "Leo_testing_folder\\failed_attempts_stream\\output_image.png"  # Adjust the output filename and format as needed
     width = 1920  # Adjust the width of the video frames
     height = 1080  # Adjust the height of the video frames
 

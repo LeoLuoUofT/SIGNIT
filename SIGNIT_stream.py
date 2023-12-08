@@ -131,10 +131,7 @@ query = final_df.writeStream.outputMode("update").format("console").start()
 seconds = int(sys.argv[1])
 try:
     # Keep the script running to continuously process new data
-    query.awaitTermination(timeout=seconds)
-    if no_sanity:
-        query2.awaitTermination()
-        query3.awaitTermination()
+    spark.streams.awaitAnyTermination(seconds)
 
 except KeyboardInterrupt:
     # Stop the streaming query if interrupted
