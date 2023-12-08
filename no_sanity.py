@@ -1,1 +1,1 @@
-no_sanity=True
+no_sanity=False

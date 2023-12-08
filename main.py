@@ -51,7 +51,7 @@ def run_script(
 def create_gui(terminate_event, subprocesses):
     root = ThemedTk(theme="plastik")  # Change the theme to "plastik" for dark mode
     root.title("SPARK PROGRAM")
-    root.geometry("600x600")
+    root.geometry("800x800")
 
     text_frame = ttk.Frame(root)
     text_frame.pack(expand=True, fill="both")

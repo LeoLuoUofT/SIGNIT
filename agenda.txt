@@ -1,0 +1,28 @@
+1. Show the code in action: folder of pictures, a video, then a streaming
+
+2. explain what it does in pipeline_ex
+
+3. Go into the classifier first (why accuracy is low). Explain whats going on and why you're not using pyspark machine learning
+    a. transition into talking about SIGNIT_convert 
+
+4. Go into SIGNIT_convert, dataset creation first, then explain whats going on.
+
+5. Go into SIGNIT_stream, do an example stream from Twitch, explain how multiple streams are capable on stream_input.py. 
+    a. Explain why you didn't use spark for stream input (cause its not supported)
+    a2. explain the failed attempts
+    b. explain how the pipelines are slightly different for streaming (i.e. edit greyscale image first then save as parquet)
+    c. SIGNIT_stream does streaming
+    d. explain intermediate results
+
+6. explain how the main.py is made, how its a temporary, how it needed to be multi threaded and what happens if you stop it early.
+
+7. DONE
+
+
+
+agenda:
+acquiring training data - seems easy, is not
+
+streaming - need to resize everything first, spark streaming does not support images nor does it support fked up text files.
+
+capable of doing multiple streams but need to run manually

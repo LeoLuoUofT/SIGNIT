@@ -8,7 +8,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import Row
 from pyspark.sql.functions import col
 from pyspark.sql.types import StructType, StructField, IntegerType, ArrayType
-from tensorflow.keras.models import model_from_json
+from tensorflow.keras.models import load_model
 import sys
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import Row, SparkSession
@@ -172,6 +172,7 @@ def crop_hands(image, hand_center, max_distance):
     recolored = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
     return recolored
 
+
 # Create the training data
 def write_dataset_csv(rdd):
     schema = StructType(
@@ -246,9 +247,7 @@ def output_predicts(rdd):
     df_pandas = df.toPandas()
 
     input_data = np.array(df_pandas.iloc[:, 1:]).reshape(df.count(), 100, 100, 1)
-    with open("model.json", "r") as json_file:
-        loaded_model_json = json_file.read()
-        model = model_from_json(loaded_model_json)
+    model = load_model("model_small.keras")
     predictions = model.predict(input_data)
     predicted_indices = np.argmax(predictions, axis=1)
     predicted_class_names = [class_names[i] for i in predicted_indices]

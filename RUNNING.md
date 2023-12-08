@@ -8,7 +8,7 @@ Then simply run:
 pip install requirements.txt
 python main.py
 
-If you also wanted to see the intermediate images, you must set the global variable "no_sanity" to TRUE in all the functions in SIGNIT_convert and stream_input.
+If you also wanted to see the intermediate images, change the no_sanity variable in no_sanity.py to TRUE.
 
 This will run the main part of the code but if you wanted to create your own training/testing data from the ASL Kaggle Alphabet Library. You can navigate to Leo_testing_folder/dataset_creation. The dataset_create.py will take every nth image from every subfolder and put them into a new folder (where n is your first input), once you've made your training and test sets use filterouttrainingimages.py to remove any images in the training set that occur in the testing set. A bash file is set up to preform this for you if you need it.
 
@@ -27,3 +27,6 @@ https://drive.google.com/drive/folders/1Wkrkvy6Bl-JNvMFeZDGc8utKjkS7LJXt?usp=sha
     b)Now upload these csv files onto google colab and run the classifier.ipynb file present in the visualizations folder of the repository on google colab with these csv.
 
     c)Sit back, relax and wait for results.
+
+
+More visualization and data analysis stats is provided in the Visualizations folder, included the jupyter notebook for analysis on Deaf users and sign_langauge_users_analysis.py for analysis on deaf users who use sign language.
