@@ -35,6 +35,8 @@ def hand_detection(pair, intermediateimages=no_sanity):
 
     image_array = np.frombuffer(binary_content, np.uint8)
     image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+    if intermediateimages:
+        image_im = image.copy()
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     mp_hands = mp.solutions.hands
@@ -58,7 +60,7 @@ def hand_detection(pair, intermediateimages=no_sanity):
                 x_sum += x
                 y_sum += y
                 if intermediateimages:
-                    cv2.circle(image, (x, y), 2, (255, 0, 0), -1)
+                    cv2.circle(image_im, (x, y), 2, (255, 0, 0), -1)
 
             num_landmarks = len(hand_landmarks.landmark)
             hand_center[0] += int(x_sum / num_landmarks)
@@ -90,8 +92,8 @@ def hand_detection(pair, intermediateimages=no_sanity):
         )
 
         # Draw the center on the image and save the result to a file
-        cv2.circle(image, hand_center, 10, (0, 255, 0), -1)
-        cv2.imwrite(output_path, image)
+        cv2.circle(image_im, hand_center, 10, (0, 255, 0), -1)
+        cv2.imwrite(output_path, image_im)
 
     coutput = crop_hands(image, hand_center, max_distance)
     if intermediateimages:

@@ -14,7 +14,7 @@ os.makedirs(destination_directory, exist_ok=True)
 # Function to copy every 100th image from each subfolder
 def copy_every_100th_image(subfolder_path):
     files = os.listdir(subfolder_path)
-    selected_files = files[::5]  # Get every 100th file
+    selected_files = files[::5]  # Get every 5th file
     for file in selected_files:
         source_path = os.path.join(subfolder_path, file)
         destination_path = os.path.join(destination_directory, file)
