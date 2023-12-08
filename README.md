@@ -16,6 +16,6 @@ https://drive.google.com/drive/folders/1Wkrkvy6Bl-JNvMFeZDGc8utKjkS7LJXt?usp=sha
 
 Pfft!! Explains all the coffee lying around - Kansha
 
-Checkout stream_input.py for pulling frames from live  youtube and twitch streams.
+Please checkout stream_input.py for pulling frames from live  youtube and twitch streams.
 
-More visualization and data analysis stats in the Visualizations folder, I've included the jupyter notebook for analysis on Deaf users and Deaf
+More visualization and data analysis stats is provided in the Visualizations folder, I've included the jupyter notebook for analysis on Deaf users and sign_langauge_users_analysis.py for analysis on deaf users  who use sign language.
