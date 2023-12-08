@@ -18,4 +18,4 @@ Pfft!! Explains all the coffee lying around - Kansha
 
 Checkout stream_input.py for pulling frames from live  youtube and twitch streams.
 
-More visualization and data analysis stats in the Visualizations folder 
+More visualization and data analysis stats in the Visualizations folder, I've included the jupyter notebook for analysis on Deaf users and Deaf
