@@ -28,5 +28,7 @@ b)Now upload these csv files onto google colab and run the classifier.ipynb file
 
 c)Sit back, relax and wait for results.
 
+d)you can view the already existing results we got in the classifier_visualization.pdf or directly in the classifier.ipynb file as well.
+
 
 More visualization and data analysis stats is provided in the Visualizations folder, included the jupyter notebook for analysis on Deaf users and sign_langauge_users_analysis.py for analysis on deaf users who use sign language.
